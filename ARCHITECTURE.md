@@ -9,7 +9,13 @@
 | **React + Vite** | Vite gives instant HMR and tree-shaking. React's component model maps cleanly onto the "panel + map + timeline" UI. |
 | **Canvas 2D API** | Leaflet.js is heavy and designed for geographic tile maps. Since we already have pixel coordinates after the world→minimap conversion, a plain canvas is faster, simpler, and avoids Leaflet's CRS complexities. |
 | **heatmap.js** | Pure JS, no Leaflet dependency, renders gaussian blobs directly on a canvas, small bundle. |
-| **Render + Vercel** | Render runs the FastAPI service with native Python build/start commands and `$PORT`. Vercel is optimal for static React builds. Both have free tiers (Render free tier may cold-start). |
+| **Local dev servers only** | The stack is intended to run on a developer machine: `uvicorn` serves the API and Vite serves the SPA in dev (with `/api` proxied). Match Parquet stays on disk via `PLAYER_DATA_PATH`; nothing in this repo assumes a production host, CI image, or cloud region. |
+
+---
+
+## Deployment / hosting
+
+This project does **not** target a deployed environment. Level designers and analysts run **backend + frontend locally** (see `README.md`), point the API at an on-disk `player_data` tree, and keep sensitive match data off shared infrastructure unless your studio adds that separately.
 
 ---
 
