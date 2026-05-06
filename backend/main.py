@@ -6,9 +6,11 @@ FastAPI backend serving processed match data to the React frontend.
 import os
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 import pandas as pd
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,6 +25,9 @@ from coordinate_utils import world_to_pixel
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+_BACKEND_DIR = Path(__file__).resolve().parent
+load_dotenv(_BACKEND_DIR / ".env")
 
 # ---------------------------------------------------------------------------
 # Colour palettes
@@ -44,13 +49,54 @@ def _pick_color(is_bot: bool, index: int) -> str:
     return palette[index % len(palette)]
 
 
+def _read_first_config_line(config_path: Path) -> Optional[str]:
+    if not config_path.is_file():
+        return None
+    text = config_path.read_text(encoding="utf-8")
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if (line.startswith('"') and line.endswith('"')) or (
+            line.startswith("'") and line.endswith("'")
+        ):
+            line = line[1:-1]
+        return line
+    return None
+
+
+def _resolve_configured_path(backend_dir: Path, configured: str) -> str:
+    expanded = os.path.expanduser(configured.strip())
+    p = Path(expanded)
+    if not p.is_absolute():
+        p = (backend_dir / p).resolve()
+    else:
+        p = p.resolve()
+    return str(p)
+
+
+def _resolve_data_root() -> str:
+    """
+    Parquet root: PLAYER_DATA_PATH (.env or host env), else data_path.local,
+    else ../player_data relative to backend/.
+    """
+    backend_dir = _BACKEND_DIR
+    env_path = (os.environ.get("PLAYER_DATA_PATH") or "").strip()
+    if env_path:
+        return _resolve_configured_path(backend_dir, env_path)
+    file_line = _read_first_config_line(backend_dir / "data_path.local")
+    if file_line:
+        return _resolve_configured_path(backend_dir, file_line)
+    return str((backend_dir / ".." / "player_data").resolve())
+
+
 # ---------------------------------------------------------------------------
 # App lifecycle
 # ---------------------------------------------------------------------------
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    data_root = os.environ.get("PLAYER_DATA_PATH", "../player_data")
+    data_root = _resolve_data_root()
     logger.info("Loading player data from: %s", data_root)
     load_all_data(data_root)
     logger.info("Data loaded — API ready.")

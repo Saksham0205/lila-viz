@@ -83,7 +83,10 @@ def load_all_data(data_root: str) -> None:
 
     data_path = Path(data_root)
     if not data_path.exists():
-        raise FileNotFoundError(f"PLAYER_DATA_PATH not found: {data_root}")
+        raise FileNotFoundError(
+            f"Data root not found: {data_root}. "
+            "Set the path in backend/data_path.local (see data_path.local.example)."
+        )
 
     day_folders = sorted(
         d for d in data_path.iterdir()
@@ -104,7 +107,10 @@ def load_all_data(data_root: str) -> None:
                 file_count += 1
 
     if not frames:
-        raise RuntimeError("No data files loaded — check PLAYER_DATA_PATH.")
+        raise RuntimeError(
+            "No data files loaded — check backend/data_path.local and that "
+            "day folders with *.nakama-0 Parquet files exist under that path."
+        )
 
     combined = pd.concat(frames, ignore_index=True)
 

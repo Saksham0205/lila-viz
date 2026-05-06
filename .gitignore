@@ -1,5 +1,11 @@
-# Player data — too large for git, mounted via env var PLAYER_DATA_PATH
+# Player data — too large for git; path via backend/.env (PLAYER_DATA_PATH)
 player_data/
+
+# Local config (paths / API URL — copy from *.example)
+backend/.env
+backend/data_path.local
+frontend/api_url.local
+frontend/.env.local
 
 # Python
 __pycache__/
@@ -14,13 +20,6 @@ dist/
 # Node / frontend
 node_modules/
 frontend/dist/
-frontend/.env.local
-frontend/.env.*.local
-
-# Environment files
-.env
-.env.local
-*.env
 
 # OS
 .DS_Store

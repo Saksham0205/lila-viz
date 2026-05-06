@@ -5,7 +5,7 @@ import TimelinePlayer from "./components/TimelinePlayer.jsx";
 import Legend from "./components/Legend.jsx";
 import "./styles.css";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = __API_BASE__;
 
 export default function App() {
   // ── Selection state ──────────────────────────────────────────────────────

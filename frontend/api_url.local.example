@@ -1,0 +1,2 @@
+# Copy to api_url.local (one line, no trailing slash) or use VITE_API_URL in .env.local
+# https://your-api.onrender.com
